@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.v1.nifty import router as nifty_router
+from app.api.v1.dashboard import router as nifty_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Indian Stock Market API")
