@@ -49,57 +49,6 @@ class StockService:
             return False
         
 
-    # @staticmethod
-    # def fetch_and_store(symbol: str, start=None, end=None, range_value=None):
-        
-    #     symbol = StockService.normalize_symbol(symbol)
-    #     StockRepository.upsert_master(symbol)
-
-    #     # Case 1: Custom date range
-    #     if start:
-    #         data = yf.download(
-    #             symbol,
-    #             start=start.strftime("%Y-%m-%d"),
-    #             end=end.strftime("%Y-%m-%d") if end else None,
-    #             interval="1d"
-    #         )
-
-    #     # Case 2: Relative range like 5y, 6m
-    #     elif range_value:
-    #         calculated_start = StockService.calculate_start_from_range(range_value)
-
-    #         data = yf.download(
-    #             symbol,
-    #             start=calculated_start.strftime("%Y-%m-%d"),
-    #             interval="1d"
-    #         )
-
-    #     # Case 3: Incremental update
-    #     else:
-    #         last_date = StockRepository.get_last_date(symbol)
-
-    #         if last_date:
-    #             data = yf.download(
-    #                 symbol,
-    #                 start=last_date.strftime("%Y-%m-%d"),
-    #                 interval="1d"
-    #             )
-    #         else:
-    #             data = yf.download(
-    #                 symbol,
-    #                 period="max",
-    #                 interval="1d"
-    #             )
-
-    #     if data.empty:
-    #         return 0
-
-    #     inserted = StockRepository.bulk_upsert(symbol, data)
-    #     time.sleep(1)
-
-    #     return inserted
-
-
 
     @staticmethod
     def fetch_and_store(symbol: str, start=None, end=None, range_value=None):
@@ -117,17 +66,29 @@ class StockService:
 
                 StockRepository.upsert_master(symbol)
 
-                # -------- FETCH DATA --------
-                if range_value:
-                    calculated_start = StockService.calculate_start_from_range(range_value)
+                last_date = StockRepository.get_last_date(symbol)
+
+                if last_date:
+                    start_date = last_date + timedelta(days=1)
 
                     data = yf.download(
                         symbol,
-                        start=calculated_start.strftime("%Y-%m-%d"),
+                        start=start_date.strftime("%Y-%m-%d"),
                         interval="1d"
                     )
+
                 else:
-                    data = yf.download(symbol, period="1y", interval="1d")
+                    # First time download
+                    if range_value:
+                        start_date = StockService.calculate_start_from_range(range_value)
+                    else:
+                        start_date = datetime.utcnow() - timedelta(days=365)
+
+                    data = yf.download(
+                        symbol,
+                        start=start_date.strftime("%Y-%m-%d"),
+                        interval="1d"
+                    )
 
                 if data.empty:
                     session.abort_transaction()

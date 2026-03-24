@@ -5,17 +5,26 @@ dashboard_router = APIRouter(tags=["NIFTY"])
 
 @dashboard_router.get("/nifty50")
 def nifty50():
-    return get_nifty50_data()
+    try:
+        return get_nifty50_data()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @dashboard_router.get("/block_deals")
-def bolckdeal():
-    return get_bulk_deals()
+def block_deals():
+    try:
+        return get_bulk_deals()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @dashboard_router.get("/all_indicies")
-def bolckdeal():
-    return get_all_indices()
+def all_indices():
+    try:
+        return get_all_indices()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @dashboard_router.get("/sensex")
 def sensex():

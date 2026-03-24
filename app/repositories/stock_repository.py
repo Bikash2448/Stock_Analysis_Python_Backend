@@ -5,6 +5,7 @@ from app.core.database import stock_prices, stocks_master
 
 class StockRepository:
 
+# This Function is responsible for if Stock Symbol is not present then Create it, else do nothing.
     @staticmethod
     def upsert_master(symbol: str):
         stocks_master.update_one(
